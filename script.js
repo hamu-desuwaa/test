@@ -1,25 +1,21 @@
 ﻿const form = document.getElementById("survey-form");
-const thanks = document.getElementById("thanks");
-const result = document.getElementById("result");
-const message = document.getElementById("message");
-const count = document.getElementById("count");
-const again = document.getElementById("again");
+const nameInput = document.getElementById("name");
+const availableInput = document.getElementById("available");
+const errName = document.getElementById("err-name");
+const errAvailable = document.getElementById("err-available");
+const statusText = document.getElementById("status");
 const historyList = document.getElementById("history-list");
 const historyEmpty = document.getElementById("history-empty");
 const clearHistoryButton = document.getElementById("clear-history");
 
-const errors = {
-  name: document.getElementById("err-name"),
-  mood: document.getElementById("err-mood"),
-  favorite: document.getElementById("err-favorite"),
-};
-
-message.addEventListener("input", () => {
-  count.textContent = String(message.value.length);
-});
+const STORAGE_KEY = "surveyAnswers";
 
 function loadHistory() {
-  return JSON.parse(localStorage.getItem("surveyAnswers") || "[]");
+  return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+}
+
+function saveHistory(items) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
 }
 
 function formatDate(iso) {
@@ -37,108 +33,71 @@ function renderHistory() {
   historyList.innerHTML = "";
 
   if (history.length === 0) {
-    historyEmpty.classList.remove("hidden");
+    historyEmpty.style.display = "block";
     return;
   }
 
-  historyEmpty.classList.add("hidden");
+  historyEmpty.style.display = "none";
 
   history.forEach((item) => {
     const li = document.createElement("li");
-    li.className = "history-item";
-
-    const time = document.createElement("time");
-    time.className = "history-time";
-    time.textContent = formatDate(item.sentAt);
-
-    const title = document.createElement("div");
-    const strong = document.createElement("strong");
-    strong.textContent = item.name;
-    title.append(strong, ` / ${item.mood}`);
-
-    const favorite = document.createElement("div");
-    favorite.textContent = `ハマってるもの: ${item.favorite.join(" / ")}`;
-
-    const messageLine = document.createElement("div");
-    messageLine.textContent = `メッセージ: ${item.message || "(なし)"}`;
-
-    li.append(time, title, favorite, messageLine);
+    li.textContent = [
+      `${formatDate(item.sentAt)} | ${item.name}`,
+      `目標: ${item.goal || "(未記入)"}`,
+      `参加可能日時: ${item.available || "(未記入)"}`,
+      `詳しく聞きたい分野: ${item.detail || "(未記入)"}`,
+      `わからない分野: ${item.unknown || "(未記入)"}`,
+    ].join("\n");
     historyList.append(li);
   });
 }
 
 function clearErrors() {
-  Object.values(errors).forEach((el) => {
-    el.textContent = "";
-  });
-}
-
-function validate(data) {
-  let ok = true;
-
-  if (!data.name.trim()) {
-    errors.name.textContent = "名前を入力してください。";
-    ok = false;
-  }
-
-  if (!data.mood) {
-    errors.mood.textContent = "気分を選択してください。";
-    ok = false;
-  }
-
-  if (data.favorite.length === 0) {
-    errors.favorite.textContent = "最低1つ選んでください。";
-    ok = false;
-  }
-
-  return ok;
+  errName.textContent = "";
+  errAvailable.textContent = "";
 }
 
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   clearErrors();
+  statusText.textContent = "";
 
   const data = {
-    name: form.name.value,
-    mood: form.mood.value,
-    favorite: [...form.querySelectorAll("input[name='favorite']:checked")].map(
-      (el) => el.value,
-    ),
-    message: form.message.value.trim(),
+    name: nameInput.value.trim(),
+    goal: form.goal.value.trim(),
+    available: availableInput.value.trim(),
+    detail: form.detail.value.trim(),
+    unknown: form.unknown.value.trim(),
+    sentAt: new Date().toISOString(),
   };
 
-  if (!validate(data)) {
+  let hasError = false;
+  if (!data.name) {
+    errName.textContent = "お名前を入力してください。";
+    hasError = true;
+  }
+  if (!data.available) {
+    errAvailable.textContent = "参加可能な曜日と時間帯を入力してください。";
+    hasError = true;
+  }
+  if (hasError) {
     return;
   }
 
-  // For now we keep submissions in localStorage so this works without a backend.
-  const history = JSON.parse(localStorage.getItem("surveyAnswers") || "[]");
-  history.push({ ...data, sentAt: new Date().toISOString() });
-  localStorage.setItem("surveyAnswers", JSON.stringify(history));
+  const history = loadHistory();
+  history.push(data);
+  saveHistory(history);
   renderHistory();
 
-  result.textContent = [
-    `名前: ${data.name}`,
-    `気分: ${data.mood}`,
-    `ハマってるもの: ${data.favorite.join(" / ")}`,
-    `メッセージ: ${data.message || "(なし)"}`,
-  ].join("\n");
-
-  form.closest(".card").classList.add("hidden");
-  thanks.classList.remove("hidden");
-});
-
-again.addEventListener("click", () => {
+  statusText.textContent = "保存しました。";
   form.reset();
-  count.textContent = "0";
-  clearErrors();
-  thanks.classList.add("hidden");
-  form.closest(".card").classList.remove("hidden");
+  nameInput.focus();
 });
 
 clearHistoryButton.addEventListener("click", () => {
-  localStorage.removeItem("surveyAnswers");
+  localStorage.removeItem(STORAGE_KEY);
   renderHistory();
+  statusText.textContent = "履歴を削除しました。";
 });
 
 renderHistory();

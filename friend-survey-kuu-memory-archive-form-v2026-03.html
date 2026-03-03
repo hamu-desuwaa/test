@@ -3,72 +3,62 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>友だちアンケート</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+1p:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <title>課題アンケート</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main class="page">
-    <section class="card" aria-labelledby="form-title">
-      <p class="badge">FOR FRIEND</p>
-      <h1 id="form-title">友だちアンケート</h1>
-      <p class="lead">気軽に答えてね。1分で終わるよ。</p>
+  <main class="sheet">
+    <form id="survey-form" novalidate>
+      <header class="top-row">
+        <h1>課題(アンケート)</h1>
+        <label class="name-row" for="name">お名前：</label>
+        <input id="name" name="name" type="text" aria-label="お名前" required />
+      </header>
+      <p id="err-name" class="error"></p>
 
-      <form id="survey-form" novalidate>
-        <div class="field">
-          <label for="name">名前</label>
-          <input id="name" name="name" type="text" placeholder="ニックネームでもOK" required />
-          <small class="error" id="err-name"></small>
-        </div>
+      <section class="qa-block">
+        <label for="goal">・ 目標(配信目標など)</label>
+        <textarea id="goal" name="goal" rows="4"></textarea>
+      </section>
 
-        <div class="field">
-          <label for="mood">今日の気分は？</label>
-          <select id="mood" name="mood" required>
-            <option value="">選択してください</option>
-            <option>最高！</option>
-            <option>まあまあ</option>
-            <option>ちょっと疲れた</option>
-            <option>眠い</option>
-          </select>
-          <small class="error" id="err-mood"></small>
-        </div>
+      <section class="qa-block">
+        <label for="available">・ 授業または面談を参加出来る曜日と時間帯を記入してください。</label>
+        <textarea id="available" name="available" rows="6" required></textarea>
+        <p id="err-available" class="error"></p>
+      </section>
 
-        <fieldset class="field">
-          <legend>最近ハマってるもの（複数可）</legend>
-          <label class="check"><input type="checkbox" name="favorite" value="音楽" /> 音楽</label>
-          <label class="check"><input type="checkbox" name="favorite" value="アニメ" /> アニメ</label>
-          <label class="check"><input type="checkbox" name="favorite" value="ゲーム" /> ゲーム</label>
-          <label class="check"><input type="checkbox" name="favorite" value="グルメ" /> グルメ</label>
-          <small class="error" id="err-favorite"></small>
-        </fieldset>
+      <section class="qa-block">
+        <label for="detail">・ 教えれる分野の中で特に詳しく教えて欲しい部分を全て教えてください</label>
+        <textarea id="detail" name="detail" rows="6"></textarea>
+      </section>
 
-        <div class="field">
-          <label for="message">ひとことメッセージ</label>
-          <textarea id="message" name="message" rows="4" maxlength="120" placeholder="自由にどうぞ"></textarea>
-          <div class="meta"><span id="count">0</span>/120</div>
-        </div>
+      <section class="qa-block">
+        <label for="unknown">・ わからない分野がありましたら詳しく書いてください。</label>
+        <textarea id="unknown" name="unknown" rows="6"></textarea>
+      </section>
 
-        <button type="submit" class="submit">送信する</button>
-      </form>
-    </section>
-
-    <section class="card hidden" id="thanks" aria-live="polite">
-      <h2>回答ありがとう！</h2>
-      <p>内容を受け取りました。</p>
-      <pre id="result"></pre>
-      <button id="again" class="secondary">もう一度回答する</button>
-    </section>
-
-    <section class="card history-card" aria-labelledby="history-title">
-      <div class="history-head">
-        <h2 id="history-title">回答履歴</h2>
-        <button id="clear-history" class="secondary danger" type="button">履歴を全削除</button>
+      <div class="actions">
+        <button type="submit">保存する</button>
+        <p id="status" aria-live="polite"></p>
       </div>
-      <p class="lead small">この端末のブラウザに保存された回答を表示します。</p>
-      <ul id="history-list" class="history-list"></ul>
-      <p id="history-empty" class="history-empty">まだ回答はありません。</p>
+    </form>
+
+    <footer class="memo">
+      <p>このアンケートの内容は個人で受け取ります。<br />
+      外部にも漏らしませんので、ご安心して心配事などを綴ってください。</p>
+      <strong>AIS</strong>
+    </footer>
+
+    <section class="history" aria-labelledby="history-title">
+      <div class="history-head">
+        <h2 id="history-title">保存済み回答（この端末）</h2>
+        <button id="clear-history" type="button">履歴を削除</button>
+      </div>
+      <ul id="history-list"></ul>
+      <p id="history-empty">まだ保存された回答はありません。</p>
     </section>
   </main>
 
